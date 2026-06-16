@@ -1,743 +1,315 @@
 /**
  * ============================================
- * 交互逻辑文件 - 安理工学生工具门户
+ * 应用脚本 - 安理工学生工具门户
  * ============================================
- * 
- * 本文件包含所有页面交互逻辑：
- * 1. 页面初始化
- * 2. Tab导航切换
- * 3. 搜索功能
- * 4. 通知筛选
- * 5. 工具页面Tab切换
- * 6. 关于页反馈表单
- * 
- * 【修改指南】
- * - 大部分功能已封装成函数，方便理解和修改
- * - 如需添加新功能，在对应区域添加代码
+ * 功能：
+ * 1. 渲染工具链接分类列表
+ * 2. 搜索过滤
+ * 3. 深色模式切换
+ * 4. 通知标签筛选
  */
 
 // ============================================
-// 1. 页面初始化
+// DOM 元素引用
+// ============================================
+const searchInput = document.getElementById('searchInput');
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.querySelector('.theme-icon');
+const toolsContainer = document.getElementById('toolsContainer');
+const filterTags = document.getElementById('filterTags');
+const noticesList = document.getElementById('noticesList');
+const versionText = document.getElementById('versionText');
+
+// ============================================
+// 状态管理
+// ============================================
+let currentTag = '全部'; // 当前选中的筛选标签
+let searchQuery = '';    // 当前搜索关键词
+
+// ============================================
+// 初始化
+// ============================================
+function init() {
+    // 初始化深色模式
+    initTheme();
+
+    // 渲染版本信息
+    renderVersion();
+
+    // 渲染工具分类列表
+    renderTools();
+
+    // 渲染通知标签
+    renderNoticeTags();
+
+    // 渲染通知列表
+    renderNotices();
+
+    // 绑定事件
+    bindEvents();
+}
+
+// ============================================
+// 深色模式相关
 // ============================================
 
 /**
- * 页面加载完成后执行初始化
+ * 初始化深色模式
+ * 检查用户偏好或系统设置
  */
-document.addEventListener('DOMContentLoaded', function() {
-    // 初始化顶部导航
-    initHeader();
-    
-    // 初始化底部Tab导航
-    initTabBar();
-    
-    // 初始化首页内容
-    initHomePage();
-    
-    // 初始化工具页
-    initToolsPage();
-    
-    // 初始化通知页
-    initNoticePage();
-    
-    // 初始化关于页
-    initAboutPage();
-    
-    console.log('✅ 安理工学生工具门户初始化完成');
-});
+function initTheme() {
+    // 优先级：localStorage > 系统偏好
+    const savedTheme = localStorage.getItem('theme');
 
-// ============================================
-// 2. 顶部导航功能
-// ============================================
-
-/**
- * 初始化顶部导航
- * - 设置网站名称
- * - 设置免责声明
- * - 配置全局搜索
- */
-function initHeader() {
-    const headerTitle = document.getElementById('headerTitle');
-    const headerDisclaimer = document.getElementById('headerDisclaimer');
-    const globalSearch = document.getElementById('globalSearch');
-    
-    // 设置网站名称（从配置读取）
-    if (headerTitle && SITE_CONFIG) {
-        headerTitle.textContent = SITE_CONFIG.siteName;
+    if (savedTheme) {
+        setTheme(savedTheme);
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        setTheme('dark');
+    } else {
+        setTheme('light');
     }
-    
-    // 设置免责声明
-    if (headerDisclaimer && SITE_CONFIG) {
-        headerDisclaimer.textContent = SITE_CONFIG.disclaimer;
-    }
-    
-    // 全局搜索功能
-    if (globalSearch) {
-        globalSearch.addEventListener('input', debounce(handleGlobalSearch, 300));
-    }
-}
 
-/**
- * 全局搜索处理函数
- * 在首页、工具、通知页面中搜索
- * 
- * @param {string} keyword - 搜索关键词
- */
-function handleGlobalSearch(keyword) {
-    keyword = keyword.trim().toLowerCase();
-    
-    if (!keyword) {
-        // 关键词为空，恢复原状
-        resetAllPages();
-        return;
-    }
-    
-    // 获取当前活动页面
-    const activePage = document.querySelector('.page.active');
-    const pageId = activePage ? activePage.id : 'homePage';
-    
-    switch (pageId) {
-        case 'homePage':
-            searchHomePage(keyword);
-            break;
-        case 'toolsPage':
-            searchToolsPage(keyword);
-            break;
-        case 'noticePage':
-            searchNoticePage(keyword);
-            break;
-        default:
-            break;
-    }
-    
-    // 显示搜索结果提示
-    showToast(`搜索: ${keyword}`, 1500);
-}
-
-/**
- * 搜索首页内容（快捷工具 + 通知）
- */
-function searchHomePage(keyword) {
-    // 搜索快捷工具
-    const quickToolItems = document.querySelectorAll('.quick-tool-item');
-    quickToolItems.forEach(item => {
-        const name = item.querySelector('.name').textContent.toLowerCase();
-        item.style.display = name.includes(keyword) ? '' : 'none';
-    });
-    
-    // 搜索通知
-    const noticeCards = document.querySelectorAll('.home-notice-card');
-    noticeCards.forEach(card => {
-        const title = card.querySelector('.notice-title').textContent.toLowerCase();
-        card.style.display = title.includes(keyword) ? '' : 'none';
+    // 监听系统主题变化
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+            setTheme(e.matches ? 'dark' : 'light');
+        }
     });
 }
 
 /**
- * 搜索工具页面
+ * 设置主题
+ * @param {string} theme - 'light' 或 'dark'
  */
-function searchToolsPage(keyword) {
-    const toolCards = document.querySelectorAll('.tool-card');
-    toolCards.forEach(card => {
-        const name = card.querySelector('.name').textContent.toLowerCase();
-        const desc = card.querySelector('.desc').textContent.toLowerCase();
-        card.style.display = (name.includes(keyword) || desc.includes(keyword)) ? '' : 'none';
-    });
+function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
 }
 
 /**
- * 搜索通知页面
+ * 切换深色模式
  */
-function searchNoticePage(keyword) {
-    const noticeCards = document.querySelectorAll('.notice-full-card');
-    noticeCards.forEach(card => {
-        const title = card.querySelector('.notice-title').textContent.toLowerCase();
-        card.style.display = title.includes(keyword) ? '' : 'none';
-    });
-}
-
-/**
- * 重置所有页面显示
- */
-function resetAllPages() {
-    // 重置快捷工具
-    document.querySelectorAll('.quick-tool-item').forEach(item => {
-        item.style.display = '';
-    });
-    
-    // 重置通知
-    document.querySelectorAll('.home-notice-card').forEach(card => {
-        card.style.display = '';
-    });
-    
-    // 重置工具卡片
-    document.querySelectorAll('.tool-card').forEach(card => {
-        card.style.display = '';
-    });
-    
-    // 重置通知卡片
-    document.querySelectorAll('.notice-full-card').forEach(card => {
-        card.style.display = '';
-    });
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
 }
 
 // ============================================
-// 3. 底部Tab导航功能
+// 渲染函数
 // ============================================
 
 /**
- * 初始化底部Tab导航
+ * 渲染版本信息
  */
-function initTabBar() {
-    const tabItems = document.querySelectorAll('.tab-bar-item');
-    
-    tabItems.forEach(item => {
-        item.addEventListener('click', function() {
-            // 获取目标页面ID
-            const targetPage = this.dataset.page;
-            
-            // 切换Tab高亮状态
-            tabItems.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            
-            // 切换页面显示
-            showPage(targetPage);
-        });
+function renderVersion() {
+    versionText.textContent = `${SITE_CONFIG.siteName} ${SITE_CONFIG.version}`;
+}
+
+/**
+ * 渲染工具分类列表
+ */
+function renderTools() {
+    // 按分类分组工具
+    const groupedTools = {};
+
+    TOOLS_DATA.forEach(tool => {
+        if (!groupedTools[tool.category]) {
+            groupedTools[tool.category] = [];
+        }
+        groupedTools[tool.category].push(tool);
     });
-}
 
-/**
- * 显示指定页面
- * 
- * @param {string} pageId - 页面ID（不含Page后缀）
- */
-function showPage(pageId) {
-    // 隐藏所有页面
-    document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-    });
-    
-    // 显示目标页面
-    const targetPage = document.getElementById(pageId + 'Page');
-    if (targetPage) {
-        targetPage.classList.add('active');
-    }
-}
+    // 按指定顺序排列分类
+    const sortedCategories = CATEGORY_ORDER.filter(cat => groupedTools[cat]);
+    const extraCategories = Object.keys(groupedTools).filter(cat => !CATEGORY_ORDER.includes(cat));
+    const allCategories = [...sortedCategories, ...extraCategories];
 
-// ============================================
-// 4. 首页内容初始化
-// ============================================
-
-/**
- * 初始化首页内容
- */
-function initHomePage() {
-    // 渲染快捷工具入口
-    renderQuickTools();
-    
-    // 渲染通知公告
-    renderHomeNotices();
-}
-
-/**
- * 渲染首页快捷工具入口
- * 从TOOLS_DATA中选取最常用的工具
- */
-function renderQuickTools() {
-    const container = document.getElementById('quickTools');
-    if (!container) return;
-    
-    // 选取快捷工具（取官方工具的前12个，涵盖更多分类）
-    const quickTools = TOOLS_DATA.official.slice(0, 12);
-    
+    // 生成HTML
     let html = '';
-    quickTools.forEach(tool => {
+
+    allCategories.forEach(category => {
+        const tools = groupedTools[category];
+        if (!tools || tools.length === 0) return;
+
         html += `
-            <a href="${tool.url}" 
-               class="quick-tool-item" 
-               target="_blank" 
-               rel="noopener noreferrer"
-               title="${tool.name}: ${tool.desc}">
-                <span class="icon">${tool.icon}</span>
-                <span class="name">${tool.name}</span>
-            </a>
-        `;
-    });
-    
-    container.innerHTML = html;
-}
-
-/**
- * 渲染首页通知公告
- * 只显示最新的5条
- */
-function renderHomeNotices() {
-    const container = document.getElementById('homeNotices');
-    if (!container) return;
-    
-    // 取最新5条通知
-    const recentNotices = NOTICES_DATA.slice(0, 5);
-    
-    let html = '';
-    recentNotices.forEach(notice => {
-        html += `
-            <div class="notice-card home-notice-card">
-                <span class="notice-icon">📢</span>
-                <div class="notice-content">
-                    <div class="notice-title">${notice.title}</div>
-                    <div class="notice-meta">
-                        <span>${notice.source}</span>
-                        <span>·</span>
-                        <span>${notice.date}</span>
-                    </div>
-                    <div class="notice-tags">
-                        ${notice.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-    
-    container.innerHTML = html;
-}
-
-// ============================================
-// 5. 工具页面功能
-// ============================================
-
-/**
- * 初始化工具页面
- */
-function initToolsPage() {
-    renderAllTools();
-    
-    // 初始化工具页Tab切换
-    initToolsTabs();
-}
-
-/**
- * 渲染所有工具
- */
-function renderAllTools() {
-    // 渲染官方工具
-    renderOfficialTools();
-    
-    // 渲染通用工具
-    renderGeneralTools();
-}
-
-/**
- * 渲染官方/校内工具
- */
-function renderOfficialTools() {
-    const container = document.getElementById('officialTools');
-    if (!container) return;
-    
-    // 按分类分组
-    const grouped = groupByCategory(TOOLS_DATA.official);
-    
-    let html = '';
-    for (const [category, tools] of Object.entries(grouped)) {
-        html += `
-            <div class="tools-category">
-                <h3 class="tools-category-title">${category}</h3>
+            <section class="section" data-category="${category}">
+                <h2 class="section-title">${category}</h2>
                 <div class="tools-grid">
-                    ${tools.map(tool => createToolCard(tool)).join('')}
+                    ${tools.map(tool => createToolLink(tool)).join('')}
                 </div>
-            </div>
+            </section>
         `;
-    }
-    
-    container.innerHTML = html;
+    });
+
+    toolsContainer.innerHTML = html;
 }
 
 /**
- * 渲染通用实用工具
- */
-function renderGeneralTools() {
-    const container = document.getElementById('generalTools');
-    if (!container) return;
-    
-    // 按分类分组
-    const grouped = groupByCategory(TOOLS_DATA.general);
-    
-    let html = '';
-    for (const [category, tools] of Object.entries(grouped)) {
-        html += `
-            <div class="tools-category">
-                <h3 class="tools-category-title">${category}</h3>
-                <div class="tools-grid">
-                    ${tools.map(tool => createToolCard(tool)).join('')}
-                </div>
-            </div>
-        `;
-    }
-    
-    container.innerHTML = html;
-}
-
-/**
- * 创建工具卡片HTML
- * 
- * @param {Object} tool - 工具对象
+ * 创建单个工具链接HTML
+ * @param {Object} tool - 工具数据
  * @returns {string} HTML字符串
  */
-function createToolCard(tool) {
+function createToolLink(tool) {
     return `
         <a href="${tool.url}" 
-           class="tool-card" 
+           class="tool-link" 
            target="_blank" 
            rel="noopener noreferrer"
-           title="${tool.desc}">
-            <span class="icon">${tool.icon}</span>
-            <div class="info">
-                <div class="name">${tool.name}</div>
-                <div class="desc">${tool.desc}</div>
-            </div>
+           data-name="${tool.name}"
+           data-category="${tool.category}">
+            <span class="tool-icon">${tool.icon || '🔗'}</span>
+            <span class="tool-name">${tool.name}</span>
         </a>
     `;
 }
 
 /**
- * 按分类分组工具
- * 
- * @param {Array} tools - 工具数组
- * @returns {Object} 分组后的对象
+ * 渲染通知标签
  */
-function groupByCategory(tools) {
-    return tools.reduce((acc, tool) => {
-        const category = tool.category;
-        if (!acc[category]) {
-            acc[category] = [];
-        }
-        acc[category].push(tool);
-        return acc;
-    }, {});
+function renderNoticeTags() {
+    const html = NOTICE_TAGS.map(tag => `
+        <button class="filter-tag ${tag === currentTag ? 'active' : ''}" 
+                data-tag="${tag}">
+            ${tag}
+        </button>
+    `).join('');
+
+    filterTags.innerHTML = html;
 }
 
 /**
- * 初始化工具页的Tab切换
+ * 渲染通知列表
+ * 根据当前筛选标签和搜索关键词过滤
  */
-function initToolsTabs() {
-    const tabItems = document.querySelectorAll('.tools-tab-item');
-    const officialSection = document.getElementById('officialTools');
-    const generalSection = document.getElementById('generalTools');
-    
-    tabItems.forEach(item => {
-        item.addEventListener('click', function() {
-            const target = this.dataset.tab;
-            
-            // 切换Tab高亮
-            tabItems.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            
-            // 切换内容显示
-            if (target === 'official') {
-                officialSection.style.display = 'block';
-                generalSection.style.display = 'none';
-            } else {
-                officialSection.style.display = 'none';
-                generalSection.style.display = 'block';
-            }
-        });
-    });
-}
+function renderNotices() {
+    // 过滤通知
+    let filteredNotices = NOTICES_DATA;
 
-// ============================================
-// 6. 通知页面功能
-// ============================================
+    // 按标签筛选
+    if (currentTag !== '全部') {
+        filteredNotices = filteredNotices.filter(notice =>
+            notice.tags.includes(currentTag)
+        );
+    }
 
-/**
- * 初始化通知页面
- */
-function initNoticePage() {
-    renderNoticeFilters();
-    renderAllNotices();
-    initNoticeFilterTabs();
-}
+    // 按搜索关键词筛选
+    if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filteredNotices = filteredNotices.filter(notice =>
+            notice.title.toLowerCase().includes(query) ||
+            notice.source.toLowerCase().includes(query) ||
+            notice.tags.some(tag => tag.toLowerCase().includes(query))
+        );
+    }
 
-/**
- * 渲染通知筛选标签
- */
-function renderNoticeFilters() {
-    const container = document.getElementById('noticeFilters');
-    if (!container) return;
-    
-    let html = '';
-    NOTICE_TAGS.forEach((tag, index) => {
-        const isActive = index === 0 ? 'active' : '';
-        html += `
-            <button class="tab-item notice-filter-tag ${isActive}" 
-                    data-tag="${tag}">
-                ${tag}
-            </button>
-        `;
-    });
-    
-    container.innerHTML = html;
-}
-
-/**
- * 初始化通知筛选Tab点击事件
- */
-function initNoticeFilterTabs() {
-    const container = document.getElementById('noticeFilters');
-    if (!container) return;
-    
-    container.addEventListener('click', function(e) {
-        const tagBtn = e.target.closest('.notice-filter-tag');
-        if (!tagBtn) return;
-        
-        const tag = tagBtn.dataset.tag;
-        
-        // 切换Tab高亮
-        container.querySelectorAll('.notice-filter-tag').forEach(t => {
-            t.classList.remove('active');
-        });
-        tagBtn.classList.add('active');
-        
-        // 筛选通知
-        filterNoticesByTag(tag);
-    });
-}
-
-/**
- * 按标签筛选通知
- * 
- * @param {string} tag - 标签名称
- */
-function filterNoticesByTag(tag) {
-    const noticeCards = document.querySelectorAll('.notice-full-card');
-    
-    noticeCards.forEach(card => {
-        const tags = card.dataset.tags.split(',');
-        
-        if (tag === '全部' || tags.includes(tag)) {
-            card.style.display = '';
-        } else {
-            card.style.display = 'none';
-        }
-    });
-}
-
-/**
- * 渲染所有通知（完整列表）
- */
-function renderAllNotices() {
-    const container = document.getElementById('allNotices');
-    if (!container) return;
-    
-    // 按日期降序排序
-    const sortedNotices = [...NOTICES_DATA].sort((a, b) => {
-        return new Date(b.date) - new Date(a.date);
-    });
-    
-    let html = '';
-    sortedNotices.forEach(notice => {
-        html += `
-            <div class="notice-card notice-full-card" data-tags="${notice.tags.join(',')}">
-                <span class="notice-icon">📢</span>
-                <div class="notice-content">
-                    <div class="notice-title">${notice.title}</div>
-                    <div class="notice-meta">
-                        <span>${notice.source}</span>
-                        <span>·</span>
-                        <span>${notice.date}</span>
-                    </div>
-                    ${notice.content ? `<p style="font-size:12px;color:#666;margin-top:4px;">${notice.content}</p>` : ''}
-                    <div class="notice-tags">
-                        ${notice.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-                    </div>
-                </div>
+    // 生成HTML
+    if (filteredNotices.length === 0) {
+        noticesList.innerHTML = `
+            <div class="no-results">
+                ${searchQuery ? '未找到匹配的通知' : '暂无通知'}
             </div>
         `;
-    });
-    
-    container.innerHTML = html;
-}
-
-// ============================================
-// 7. 关于页面功能
-// ============================================
-
-/**
- * 初始化关于页面
- */
-function initAboutPage() {
-    // 渲染版本信息
-    const versionEl = document.getElementById('versionInfo');
-    if (versionEl && SITE_CONFIG) {
-        versionEl.textContent = `${SITE_CONFIG.version} · 最后更新: ${SITE_CONFIG.lastUpdate}`;
+        return;
     }
-    
-    // 绑定反馈表单提交
-    initFeedbackForm();
-}
 
-/**
- * 初始化反馈表单
- */
-function initFeedbackForm() {
-    const form = document.getElementById('feedbackForm');
-    if (!form) return;
-    
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const name = document.getElementById('feedbackName').value.trim();
-        const contact = document.getElementById('feedbackContact').value.trim();
-        const content = document.getElementById('feedbackContent').value.trim();
-        
-        // 简单验证
-        if (!content) {
-            showToast('请填写反馈内容', 2000);
-            return;
-        }
-        
-        // MVP阶段：显示提示信息
-        // 实际项目中这里会发送到后端API
-        showToast('反馈已收到，感谢您的建议！', 3000);
-        
-        // 清空表单
-        form.reset();
-        
-        console.log('反馈内容:', { name, contact, content });
-    });
+    const html = filteredNotices.map(notice => `
+        <div class="notice-item">
+            <div class="notice-header">
+                <span class="notice-title">${notice.title}</span>
+                <span class="notice-date">${notice.date}</span>
+            </div>
+            <div class="notice-meta">
+                <span class="notice-source">${notice.source}</span>
+                <div class="notice-tags">
+                    ${notice.tags.map(tag => `<span class="notice-tag">${tag}</span>`).join('')}
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    noticesList.innerHTML = html;
 }
 
 // ============================================
-// 8. 工具函数
+// 搜索功能
 // ============================================
 
 /**
- * 防抖函数
- * 在事件触发n毫秒后执行，n毫秒内再次触发则重新计时
- * 
- * @param {Function} fn - 要执行的函数
- * @param {number} delay - 延迟时间（毫秒）
- * @returns {Function} 防抖后的函数
+ * 处理搜索输入
+ * @param {string} query - 搜索关键词
  */
-function debounce(fn, delay) {
-    let timer = null;
-    return function(...args) {
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-            fn.apply(this, args);
-        }, delay);
-    };
-}
+function handleSearch(query) {
+    searchQuery = query.trim().toLowerCase();
 
-/**
- * 显示Toast提示
- * 
- * @param {string} message - 提示文本
- * @param {number} duration - 显示时长（毫秒）
- */
-function showToast(message, duration = 2000) {
-    // 检查是否已有Toast
-    let existingToast = document.querySelector('.toast');
-    if (existingToast) {
-        existingToast.remove();
-    }
-    
-    // 创建Toast元素
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.textContent = message;
-    toast.style.cssText = `
-        position: fixed;
-        top: 80px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0,0,0,0.8);
-        color: #fff;
-        padding: 10px 20px;
-        border-radius: 20px;
-        font-size: 14px;
-        z-index: 9999;
-        animation: fadeIn 0.2s ease-out;
-    `;
-    
-    document.body.appendChild(toast);
-    
-    // 自动移除
-    setTimeout(() => {
-        toast.style.animation = 'fadeOut 0.2s ease-out';
-        setTimeout(() => toast.remove(), 200);
-    }, duration);
-}
+    // 过滤工具链接
+    const allToolLinks = document.querySelectorAll('.tool-link');
+    const allSections = document.querySelectorAll('#toolsContainer .section');
 
-/**
- * 格式化日期
- * 
- * @param {string} dateStr - 日期字符串
- * @returns {string} 格式化后的日期
- */
-function formatDate(dateStr) {
-    const date = new Date(dateStr);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-}
-
-// ============================================
-// 9. 预留扩展接口
-// ============================================
-
-/**
- * 【扩展指南】
- * 如需接入后端API，可按以下格式扩展：
- */
-
-/**
- * 获取通知列表（API版本）
- * @param {Object} params - 查询参数
- * @returns {Promise} 通知列表
- */
-/*
-async function fetchNoticesAPI(params) {
-    try {
-        const response = await fetch('/api/notices?' + new URLSearchParams(params));
-        const data = await response.json();
-        return data.list;
-    } catch (error) {
-        console.error('获取通知失败:', error);
-        return [];
-    }
-}
-*/
-
-/**
- * 提交反馈（API版本）
- * @param {Object} feedback - 反馈内容
- * @returns {Promise} 提交结果
- */
-/*
-async function submitFeedbackAPI(feedback) {
-    try {
-        const response = await fetch('/api/feedback', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(feedback)
+    if (searchQuery) {
+        // 显示/隐藏工具链接
+        allToolLinks.forEach(link => {
+            const name = link.dataset.name.toLowerCase();
+            const category = link.dataset.category.toLowerCase();
+            const match = name.includes(searchQuery) || category.includes(searchQuery);
+            link.style.display = match ? '' : 'none';
         });
-        return await response.json();
-    } catch (error) {
-        console.error('提交反馈失败:', error);
-        throw error;
+
+        // 隐藏空分类
+        allSections.forEach(section => {
+            const visibleLinks = section.querySelectorAll('.tool-link:not([style*="display: none"])');
+            section.style.display = visibleLinks.length > 0 ? '' : 'none';
+        });
+    } else {
+        // 显示所有
+        allToolLinks.forEach(link => {
+            link.style.display = '';
+        });
+        allSections.forEach(section => {
+            section.style.display = '';
+        });
     }
+
+    // 重新渲染通知
+    renderNotices();
 }
-*/
 
 // ============================================
-// 10. 附加样式（渐出动画）
+// 事件绑定
 // ============================================
 
-// 添加fadeOut动画到页面
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-    @keyframes fadeOut {
-        from { opacity: 1; }
-        to { opacity: 0; }
-    }
-`;
-document.head.appendChild(styleSheet);
+function bindEvents() {
+    // 搜索输入
+    searchInput.addEventListener('input', (e) => {
+        handleSearch(e.target.value);
+    });
+
+    // 搜索框获得焦点时执行搜索（用于空搜索时的通知筛选）
+    searchInput.addEventListener('focus', () => {
+        handleSearch(searchInput.value);
+    });
+
+    // 深色模式切换
+    themeToggle.addEventListener('click', toggleTheme);
+
+    // 通知标签点击（使用事件委托）
+    filterTags.addEventListener('click', (e) => {
+        if (e.target.classList.contains('filter-tag')) {
+            currentTag = e.target.dataset.tag;
+
+            // 更新标签样式
+            document.querySelectorAll('.filter-tag').forEach(tag => {
+                tag.classList.toggle('active', tag.dataset.tag === currentTag);
+            });
+
+            // 重新渲染通知
+            renderNotices();
+        }
+    });
+}
+
+// ============================================
+// 启动应用
+// ============================================
+document.addEventListener('DOMContentLoaded', init);
