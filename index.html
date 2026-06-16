@@ -1,418 +1,89 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <!--
-    ============================================
-    安理工学生工具门户 - 主页面
-    ============================================
-    
-    一个为安徽理工大学学生打造的实用工具导航网站
-    - 纯HTML+CSS+JS，无框架依赖
-    - 移动端优先响应式设计
-    - 单页应用风格
-    
-    【修改指南】
-    - 所有外部链接在 data.js 中管理
-    - 样式在 style.css 中修改
-    - 交互逻辑在 app.js 中修改
-    -->
     <meta charset="UTF-8">
-    <!-- 移动端适配：视口宽度=device-width，禁止用户缩放 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="安理工学生工具门户 - 你的校园生活小助手，收录教务系统、图书馆、就业信息等实用工具">
-    <meta name="theme-color" content="#1e5aa8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>安理工学生工具门户</title>
-    
-    <!-- 引入样式文件 -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- ============================================
-         主容器
-         ============================================ -->
-    <div class="app-container">
-        
-        <!-- ============================================
-             顶部导航栏
-             ============================================ -->
-        <header class="header">
-            <div class="container header-content">
-                <!-- 左侧：网站名称和免责声明 -->
-                <div class="header-left">
-                    <h1 class="header-title" id="headerTitle">安理工学生工具门户</h1>
-                    <div class="header-disclaimer" id="headerDisclaimer">非官方·学生自制</div>
-                </div>
-                
-                <!-- 右侧：全局搜索框 -->
-                <div class="header-search">
-                    <div class="search-box">
-                        <span class="search-icon">🔍</span>
-                        <input type="text" 
-                               id="globalSearch" 
-                               placeholder="搜索工具/通知..."
-                               autocomplete="off">
-                    </div>
-                </div>
+    <!-- 顶部区域 -->
+    <header class="header">
+        <div class="header-content">
+            <!-- 网站名称 -->
+            <div class="site-title">
+                <h1>安理工学生工具门户</h1>
+                <p class="disclaimer" id="disclaimer">非官方·学生自制公益工具站</p>
             </div>
-        </header>
 
-        <!-- ============================================
-             页面1：首页
-             ============================================ -->
-        <main class="page active" id="homePage">
-            
-            <!-- Hero区域：标语和入口 -->
-            <section class="hero">
-                <h2 class="hero-slogan">你的校园生活小助手 🎓</h2>
-                <div class="hero-entrance">
-                    <a href="https://www.aust.edu.cn" 
-                       target="_blank" 
-                       rel="noopener noreferrer"
-                       class="hero-btn">
-                        🌟 在校生入口
-                    </a>
+            <!-- 搜索框和深色模式切换 -->
+            <div class="header-controls">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="搜索工具..." autocomplete="off">
+                    <span class="search-icon">🔍</span>
                 </div>
-            </section>
-            
-            <!-- 快捷工具入口区 -->
-            <section class="section">
-                <h3 class="section-title">📌 常用工具</h3>
-                <div class="quick-tools-wrapper">
-                    <div class="quick-tools" id="quickTools">
-                        <!-- 由JS动态渲染 -->
-                        <div class="empty-state">
-                            <span class="icon">⏳</span>
-                            <p>加载中...</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="scroll-hint">← 左右滑动查看更多 →</div>
-            </section>
-            
-            <!-- 分类导航区：按年级 -->
-            <section class="section">
-                <h3 class="section-title">📅 按年级</h3>
-                <div class="category-scroll-wrapper">
-                    <div class="category-grid">
-                    <div class="category-card">
-                        <span class="icon">🌟</span>
-                        <div class="info">
-                            <div class="name">新生专区</div>
-                            <div class="desc">录取查询、入学指南</div>
-                        </div>
-                    </div>
-                    <div class="category-card">
-                        <span class="icon">📗</span>
-                        <div class="info">
-                            <div class="name">大一大二</div>
-                            <div class="desc">基础课程、公共课</div>
-                        </div>
-                    </div>
-                    <div class="category-card">
-                        <span class="icon">📘</span>
-                        <div class="info">
-                            <div class="name">大三大四</div>
-                            <div class="desc">专业课、毕业设计</div>
-                        </div>
-                    </div>
-                    <div class="category-card">
-                        <span class="icon">🎓</span>
-                        <div class="info">
-                            <div class="name">研究生专区</div>
-                            <div class="desc">科研、论文、答辩</div>
-                        </div>
-                    </div>
-                    </div>
-                </div>
-                <div class="scroll-hint">← 左右滑动查看更多 →</div>
-            </section>
-            
-            <!-- 分类导航区：按方向 -->
-            <section class="section">
-                <h3 class="section-title">🎯 按方向</h3>
-                <div class="category-scroll-wrapper">
-                    <div class="category-grid">
-                    <div class="category-card">
-                        <span class="icon">📚</span>
-                        <div class="info">
-                            <div class="name">学习深造</div>
-                            <div class="desc">考研、保研、出国</div>
-                        </div>
-                    </div>
-                    <div class="category-card">
-                        <span class="icon">👥</span>
-                        <div class="info">
-                            <div class="name">学生工作</div>
-                            <div class="desc">学生会、社团</div>
-                        </div>
-                    </div>
-                    <div class="category-card">
-                        <span class="icon">💼</span>
-                        <div class="info">
-                            <div class="name">求职就业</div>
-                            <div class="desc">实习、就业、创业</div>
-                        </div>
-                    </div>
-                    <div class="category-card">
-                        <span class="icon">✍️</span>
-                        <div class="info">
-                            <div class="name">考公考研</div>
-                            <div class="desc">备考资料、经验</div>
-                        </div>
-                    </div>
-                    <div class="category-card">
-                        <span class="icon">🎮</span>
-                        <div class="info">
-                            <div class="name">生活休闲</div>
-                            <div class="desc">娱乐、社交</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="scroll-hint">← 左右滑动查看更多 →</div>
-            </section>
-            
-            <!-- 分类导航区：按爱好 -->
-            <section class="section">
-                <h3 class="section-title">💡 按爱好</h3>
-                <div class="category-scroll-wrapper">
-                    <div class="category-grid">
-                    <div class="category-card">
-                        <span class="icon">💻</span>
-                        <div class="info">
-                            <div class="name">数码科技</div>
-                            <div class="desc">电脑、手机</div>
-                        </div>
-                    </div>
-                    <div class="category-card">
-                        <span class="icon">⚽</span>
-                        <div class="info">
-                            <div class="name">运动户外</div>
-                            <div class="desc">体育、健身</div>
-                        </div>
-                    </div>
-                    <div class="category-card">
-                        <span class="icon">🎨</span>
-                        <div class="info">
-                            <div class="name">文艺创作</div>
-                            <div class="desc">摄影、写作</div>
-                        </div>
-                    </div>
-                    <div class="category-card">
-                        <span class="icon">🏆</span>
-                        <div class="info">
-                            <div class="name">学术竞赛</div>
-                            <div class="desc">建模、编程</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="scroll-hint">← 左右滑动查看更多 →</div>
-            </section>
-            
-            <!-- 通知公告区 -->
-            <section class="section">
-                <h3 class="section-title">📢 最新通知</h3>
-                <div class="notice-list" id="homeNotices">
-                    <!-- 由JS动态渲染 -->
-                </div>
-            </section>
-            
-        </main>
+                <button class="theme-toggle" id="themeToggle" aria-label="切换深色模式">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+        </div>
+    </header>
 
-        <!-- ============================================
-             页面2：工具集合页
-             ============================================ -->
-        <main class="page" id="toolsPage">
-            
-            <!-- 工具页Tab切换 -->
-            <div class="tools-section">
-                <div class="tabs">
-                    <button class="tab-item tools-tab-item active" data-tab="official">
-                        🏫 安理工专属工具
-                    </button>
-                    <button class="tab-item tools-tab-item" data-tab="general">
-                        🛠️ 通用实用工具
-                    </button>
-                </div>
-            </div>
-            
-            <!-- 官方工具区域 -->
-            <div class="tools-section" id="officialTools">
-                <!-- 由JS动态渲染 -->
-            </div>
-            
-            <!-- 通用工具区域 -->
-            <div class="tools-section" id="generalTools" style="display: none;">
-                <!-- 由JS动态渲染 -->
-            </div>
-            
-        </main>
+    <!-- 主内容区域 -->
+    <main class="main-content" id="mainContent">
+        <!-- 工具链接区块将通过JS动态生成 -->
+        <div id="toolsContainer"></div>
 
-        <!-- ============================================
-             页面3：通知订阅页
-             ============================================ -->
-        <main class="page" id="noticePage">
-            
-            <!-- 通知筛选标签 -->
-            <div class="notice-filter">
-                <div class="tabs" id="noticeFilters">
-                    <!-- 由JS动态渲染 -->
-                </div>
-            </div>
-            
-            <!-- 订阅提示卡片（MVP阶段仅展示UI） -->
-            <div class="notice-subscribe">
-                <h3>🔔 通知订阅提醒</h3>
-                <p>订阅你关心的通知类型，第一时间获取更新（功能开发中）</p>
-                <button class="btn" disabled>订阅设置（即将上线）</button>
-            </div>
-            
-            <!-- 完整通知列表 -->
-            <div class="notice-full-list" id="allNotices">
-                <!-- 由JS动态渲染 -->
-            </div>
-            
-        </main>
+        <!-- 通知公告区块 -->
+        <section class="section notices-section" id="noticesSection">
+            <h2 class="section-title">通知公告</h2>
 
-        <!-- ============================================
-             页面4：关于页
-             ============================================ -->
-        <main class="page" id="aboutPage">
-            
-            <div class="about-section">
-                
-                <!-- 项目介绍卡片 -->
-                <div class="about-intro">
-                    <div class="logo">🛠️</div>
-                    <h2>安理工学生工具门户</h2>
-                    <p>一个由学生发起、为学生服务的工具导航网站</p>
+            <!-- 标签筛选 -->
+            <div class="filter-tags" id="filterTags">
+                <!-- 标签将通过JS动态生成 -->
+            </div>
+
+            <!-- 通知列表 -->
+            <div class="notices-list" id="noticesList">
+                <!-- 通知将通过JS动态生成 -->
+            </div>
+        </section>
+
+        <!-- 关于本站 -->
+        <section class="section about-section" id="aboutSection">
+            <h2 class="section-title">关于本站</h2>
+            <div class="about-content">
+                <div class="about-item">
+                    <h3>项目介绍</h3>
+                    <p>安理工学生工具门户是一个整合校园常用链接的导航站点，旨在为同学们提供便捷的一站式入口。</p>
                 </div>
-                
-                <!-- 项目介绍 -->
-                <div class="about-card">
-                    <h3>📖 关于项目</h3>
-                    <p>
-                        安理工学生工具门户是一个非官方的公益项目，旨在整合校内外的实用资源，
-                        为同学们的学习和生活提供便利。我们收录了教务系统、图书馆、就业信息等常用入口，
-                        以及各类学习工具、AI工具和生活服务。
-                    </p>
-                    <p style="margin-top: 12px;">
-                        💡 特色功能：<br>
-                        • 常用工具快捷入口，一键直达<br>
-                        • 通知公告聚合，不错过重要信息<br>
-                        • 移动端优先，随时随地可用<br>
-                        • 持续更新，欢迎反馈
-                    </p>
+                <div class="about-item">
+                    <h3>免责声明</h3>
+                    <p>本站为学生自发维护的非官方项目，所有链接均跳转至学校官方或第三方平台。使用第三方服务时请遵守其服务条款，注意保护个人信息安全。</p>
                 </div>
-                
-                <!-- 免责声明 -->
-                <div class="about-card">
-                    <h3>⚠️ 免责声明</h3>
-                    <div class="disclaimer-box">
-                        <h4>重要提示</h4>
-                        <p>
-                            1. 本网站为学生自发创建的公益项目，<strong>非学校官方平台</strong>。<br><br>
-                            2. 所有工具链接均来自公开渠道，我们不对链接内容的准确性、完整性负责。<br><br>
-                            3. 如需办理重要业务（成绩查询、选课、缴费等），请<strong>务必前往学校官方平台</strong>操作。<br><br>
-                            4. 因使用本网站造成的任何损失，我们不承担任何责任。<br><br>
-                            5. 如发现链接失效或内容错误，欢迎联系我们反馈。
-                        </p>
-                    </div>
-                </div>
-                
-                <!-- 联系方式 -->
-                <div class="about-card">
-                    <h3>📬 联系我们</h3>
-                    <p>有问题或建议？欢迎通过以下方式反馈：</p>
-                    <ul style="margin-top: 12px;">
-                        <li>📧 反馈邮箱：aust_tools@outlook.com（预计2024年10月启用）</li>
-                        <li>💬 微信群：新生群内公告（待更新）</li>
-                        <li>📝 问卷反馈：<a href="#" target="_blank">在线反馈表单</a></li>
+                <div class="about-item">
+                    <h3>联系我们</h3>
+                    <p>如有问题或建议，欢迎通过以下方式反馈：</p>
+                    <ul class="contact-list">
+                        <li>邮箱：austtools@example.edu.cn</li>
+                        <li>反馈表单：<a href="#" target="_blank">点击反馈</a></li>
                     </ul>
-                    
-                    <!-- 反馈表单（MVP阶段仅UI） -->
-                    <form class="feedback-form" id="feedbackForm">
-                        <h4 style="font-size: 14px; margin: 16px 0 12px;">📝 意见反馈</h4>
-                        <input type="text" 
-                               id="feedbackName" 
-                               placeholder="你的昵称（选填）">
-                        <input type="text" 
-                               id="feedbackContact" 
-                               placeholder="联系方式（选填）">
-                        <textarea id="feedbackContent" 
-                                  placeholder="请输入你的建议或问题..." 
-                                  required></textarea>
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">
-                            提交反馈
-                        </button>
-                    </form>
                 </div>
-                
-                <!-- 技术说明 -->
-                <div class="about-card">
-                    <h3>🔧 技术说明</h3>
-                    <p>
-                        本网站采用纯前端技术栈构建：
-                    </p>
-                    <ul style="margin-top: 12px;">
-                        <li>🌐 HTML5 + CSS3 + JavaScript（原生）</li>
-                        <li>📱 移动端优先响应式设计</li>
-                        <li>⚡ 无需后端，纯静态托管</li>
-                        <li>🔒 不收集用户隐私数据</li>
-                    </ul>
-                    <p style="margin-top: 12px; color: #999; font-size: 12px;">
-                        适合新手学习参考，欢迎fork和star！
-                    </p>
-                </div>
-                
-                <!-- 版本信息 -->
-                <div class="version-info" id="versionInfo">
-                    v1.0.0 · 最后更新: 2024-09-15
-                </div>
-                
             </div>
-            
-        </main>
+        </section>
+    </main>
 
-        <!-- ============================================
-             底部Tab导航栏
-             ============================================ -->
-        <nav class="tab-bar">
-            <button class="tab-bar-item active" data-page="home">
-                <span class="icon">🏠</span>
-                <span>首页</span>
-            </button>
-            <button class="tab-bar-item" data-page="tools">
-                <span class="icon">🛠️</span>
-                <span>工具</span>
-            </button>
-            <button class="tab-bar-item" data-page="notice">
-                <span class="icon">📢</span>
-                <span>通知</span>
-            </button>
-            <button class="tab-bar-item" data-page="about">
-                <span class="icon">ℹ️</span>
-                <span>关于</span>
-            </button>
-        </nav>
-        
-        <!-- ============================================
-             底部免责声明
-             ============================================ -->
-        <footer class="disclaimer-bar">
-            ⚠️ <strong>非官方·学生自制公益工具站</strong> · 仅供学习参考使用
-        </footer>
-        
-    </div>
+    <!-- 底部 -->
+    <footer class="footer">
+        <p class="footer-disclaimer">非官方·学生自制公益工具站</p>
+        <p class="footer-info">
+            <span id="versionText"></span>
+            · <a href="#" target="_blank">意见反馈</a>
+            · <a href="#" target="_blank">Github</a>
+        </p>
+    </footer>
 
-    <!-- ============================================
-         引入数据文件（必须在app.js之前）
-         ============================================ -->
     <script src="data.js"></script>
-    
-    <!-- ============================================
-         引入交互逻辑文件
-         ============================================ -->
     <script src="app.js"></script>
-    
 </body>
 </html>
