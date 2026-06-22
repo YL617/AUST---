@@ -35,6 +35,7 @@ let pendingSearchQuery = '';
 // 初始化
 // ============================================
 function init() {
+    initStarfield();
     const restored = restorePortalState();
 
     if (!restored) {
@@ -324,6 +325,173 @@ function handleSearch(query) {
     }
 
     renderNotices();
+}
+
+// ============================================
+// 星空背景动画
+// ============================================
+function initStarfield() {
+    const canvas = document.getElementById('starfield');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    let width, height, stars, shootingStars;
+
+    function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    }
+
+    function createStars(count) {
+        const arr = [];
+        const cx = width / 2;
+        const cy = height / 2;
+        const maxR = Math.sqrt(cx * cx + cy * cy);
+        for (let i = 0; i < count; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const dist = Math.pow(Math.random(), 0.6) * maxR * 1.05;
+            arr.push({
+                x: cx + Math.cos(angle) * dist,
+                y: cy + Math.sin(angle) * dist,
+                radius: Math.random() * 2.2 + 0.3,
+                baseAlpha: Math.random() * 0.6 + 0.2,
+                twinkleSpeed: Math.random() * 0.006 + 0.003,
+                twinklePhase: Math.random() * Math.PI * 2,
+                twinkleAmplitude: Math.random() * 0.4 + 0.25,
+                orbitSpeed: (Math.random() * 0.00003 + 0.00004) * (dist < maxR * 0.35 ? 0.5 : 1),
+                orbitAngle: angle,
+                orbitRadius: dist,
+                centerX: cx,
+                centerY: cy
+            });
+        }
+        return arr;
+    }
+
+    function spawnShootingStar() {
+        return {
+            x: Math.random() * width * 0.9,
+            y: Math.random() * height * 0.4,
+            length: Math.random() * 120 + 60,
+            speed: Math.random() * 6 + 4,
+            angle: Math.PI / 4 + (Math.random() - 0.5) * 0.3,
+            alpha: 1,
+            life: 1
+        };
+    }
+
+    function drawBackground() {
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        if (isDark) {
+            const gradient = ctx.createRadialGradient(
+                width * 0.3, height * 0.3, 0,
+                width * 0.5, height * 0.5, Math.max(width, height)
+            );
+            gradient.addColorStop(0, '#0d1b2a');
+            gradient.addColorStop(0.5, '#0a1120');
+            gradient.addColorStop(1, '#050a14');
+            ctx.fillStyle = gradient;
+        } else {
+            ctx.fillStyle = '#ffffff';
+        }
+        ctx.fillRect(0, 0, width, height);
+    }
+
+    function drawStars(time) {
+        const cx = width / 2;
+        const cy = height / 2;
+        stars.forEach(star => {
+            star.orbitAngle += star.orbitSpeed;
+            star.x = cx + Math.cos(star.orbitAngle) * star.orbitRadius;
+            star.y = cy + Math.sin(star.orbitAngle) * star.orbitRadius;
+
+            const alpha = star.baseAlpha + Math.sin(time * star.twinkleSpeed + star.twinklePhase) * star.twinkleAmplitude;
+            const clamped = Math.max(0.05, Math.min(1, alpha));
+            const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+            ctx.beginPath();
+            ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+            if (isDark) {
+                ctx.fillStyle = `rgba(220, 235, 255, ${clamped})`;
+            } else {
+                ctx.fillStyle = `rgba(180, 190, 210, ${clamped * 0.3})`;
+            }
+            ctx.fill();
+
+            if (star.radius > 1.3 && isDark) {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius * 3, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(200, 220, 255, ${clamped * 0.12})`;
+                ctx.fill();
+            }
+        });
+    }
+
+    function drawShootingStars(time) {
+        shootingStars.forEach((s, i) => {
+            s.x += Math.cos(s.angle) * s.speed;
+            s.y += Math.sin(s.angle) * s.speed;
+            s.life -= 0.008;
+            s.alpha = s.life;
+
+            if (s.life <= 0) {
+                shootingStars.splice(i, 1);
+                return;
+            }
+
+            const tailX = s.x - Math.cos(s.angle) * s.length;
+            const tailY = s.y - Math.sin(s.angle) * s.length;
+
+            const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+            if (isDark) {
+                const gradient = ctx.createLinearGradient(tailX, tailY, s.x, s.y);
+                gradient.addColorStop(0, `rgba(255, 255, 255, 0)`);
+                gradient.addColorStop(1, `rgba(255, 255, 255, ${s.alpha})`);
+                ctx.beginPath();
+                ctx.moveTo(tailX, tailY);
+                ctx.lineTo(s.x, s.y);
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, 2, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
+                ctx.fill();
+            }
+        });
+    }
+
+    function animate(time) {
+        drawBackground();
+        drawStars(time);
+        drawShootingStars(time);
+
+        if (Math.random() < 0.008) {
+            const count = Math.random() < 0.2 ? Math.floor(Math.random() * 3) + 2 : 1;
+            for (let i = 0; i < count; i++) {
+                shootingStars.push(spawnShootingStar());
+            }
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    resize();
+    stars = createStars(Math.min(500, Math.floor((width * height) / 3000)));
+    shootingStars = [];
+
+    window.addEventListener('resize', () => {
+        resize();
+        const cx = width / 2;
+        const cy = height / 2;
+        stars.forEach(star => {
+            star.centerX = cx;
+            star.centerY = cy;
+        });
+        stars = createStars(Math.min(500, Math.floor((width * height) / 3000)));
+    });
+
+    requestAnimationFrame(animate);
 }
 
 // ============================================
