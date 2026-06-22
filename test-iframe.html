@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>iframe test</title></head>
+<body style="padding:20px;font-family:sans-serif">
+<h3>测试1: 直接加载百度 (无代理)</h3>
+<iframe src="https://www.baidu.com" width="100%" height="200" style="border:1px solid #ccc"></iframe>
+
+<h3>测试2: 通过代理加载百度</h3>
+<iframe src="http://localhost:3000/proxy?url=https://www.baidu.com" width="100%" height="200" style="border:1px solid #ccc"></iframe>
+
+<h3>测试3: 通过代理加载腾讯朱雀</h3>
+<iframe src="http://localhost:3000/proxy?url=https://matrix.tencent.com/ai-detect/ai_gen" width="100%" height="300" style="border:1px solid #ccc"></iframe>
+
+<h3>测试4: 通过代理加载中国知网</h3>
+<iframe src="http://localhost:3000/proxy?url=https://www.cnki.net" width="100%" height="300" style="border:1px solid #ccc"></iframe>
+</body>
+</html>

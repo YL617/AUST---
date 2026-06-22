@@ -121,32 +121,26 @@ const TOOLS_DATA = [
         category: '安理工·生活',
         icon: '📦'
     },
+    {
+        name: '朵朵校友圈',
+        url: 'https://www.duoduo.link/experience',
+        category: '安理工·生活',
+        icon: '🌸'
+    },
 
     // ===== 学术搜索 · 查重 =====
-    {
-        name: '中国知网',
-        url: 'https://www.cnki.net',
-        category: '学术搜索·查重',
-        icon: '📚'
-    },
-    {
-        name: '万方数据',
-        url: 'https://www.wanfangdata.com.cn',
-        category: '学术搜索·查重',
-        icon: '📖'
-    },
-    {
-        name: '百度学术',
-        url: 'https://xueshu.baidu.com',
-        category: '学术搜索·查重',
-        icon: '🔍'
-    },
-    {
-        name: '谷歌学术',
-        url: 'https://scholar.google.com',
-        category: '学术搜索·查重',
-        icon: '🌐'
-    },
+    { name: '安理图书馆', url: 'http://lib.aust.edu.cn', category: '学术搜索·查重', icon: '📚' },
+    { name: '朱雀AI检测', url: 'https://matrix.tencent.com/ai-detect/ai_gen', category: '学术搜索·查重', icon: '🔍' },
+    { name: '中国知网', url: 'https://www.cnki.net', category: '学术搜索·查重', icon: '📖' },
+    { name: '谷歌学术', url: 'https://scholar.google.com', category: '学术搜索·查重', icon: '🌐' },
+    { name: '必应学术', url: 'https://www.bing.com/academic', category: '学术搜索·查重', icon: '🔎' },
+    { name: '百度学术', url: 'https://xueshu.baidu.com', category: '学术搜索·查重', icon: '🔍' },
+    { name: '维普网', url: 'https://www.cqvip.com', category: '学术搜索·查重', icon: '📄' },
+    { name: '爱学术', url: 'https://www.ixueshu.com', category: '学术搜索·查重', icon: '📝' },
+    { name: '万方数据', url: 'https://www.wanfangdata.com.cn', category: '学术搜索·查重', icon: '📊' },
+    { name: 'Github', url: 'https://github.com', category: '学术搜索·查重', icon: '💻' },
+    { name: 'WOS', url: 'https://www.webofscience.com', category: '学术搜索·查重', icon: '🌍' },
+    { name: 'Sci-Hub', url: 'https://sci-hub.se', category: '学术搜索·查重', icon: '🔓' },
 
     // ===== AI工具 =====
     {
@@ -173,13 +167,37 @@ const TOOLS_DATA = [
         category: 'AI工具',
         icon: '🔎'
     },
+    {
+        name: '豆包',
+        url: 'https://www.doubao.com/chat/',
+        category: 'AI工具',
+        icon: '🫘'
+    },
+    {
+        name: 'DeepSeek',
+        url: 'https://chat.deepseek.com/',
+        category: 'AI工具',
+        icon: '🧠'
+    },
+    {
+        name: '智谱',
+        url: 'https://chatglm.cn/main/detail',
+        category: 'AI工具',
+        icon: '💡'
+    },
+    {
+        name: '扣子',
+        url: 'https://www.coze.cn/space',
+        category: 'AI工具',
+        icon: '🧩'
+    },
 
     // ===== 实用工具 =====
     {
-        name: 'iLovePDF',
-        url: 'https://www.ilovepdf.com',
+        name: 'Type Words',
+        url: 'https://typewords.cc/',
         category: '实用工具',
-        icon: '📄'
+        icon: '⌨️'
     },
     {
         name: 'Word转PDF',

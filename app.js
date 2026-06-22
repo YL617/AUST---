@@ -7,6 +7,7 @@
  * 2. 搜索过滤
  * 3. 深色模式切换
  * 4. 通知标签筛选
+ * 5. 外部链接跳转与状态恢复
  */
 
 // ============================================
@@ -23,30 +24,96 @@ const versionText = document.getElementById('versionText');
 // ============================================
 // 状态管理
 // ============================================
-let currentTag = '全部'; // 当前选中的筛选标签
-let searchQuery = '';    // 当前搜索关键词
+const PORTAL_STATE_KEY = 'portalState';
+
+let currentTag = '全部';
+let searchQuery = '';
+let pendingScrollY = 0;
+let pendingSearchQuery = '';
 
 // ============================================
 // 初始化
 // ============================================
 function init() {
-    // 初始化深色模式
-    initTheme();
+    const restored = restorePortalState();
 
-    // 渲染版本信息
+    if (!restored) {
+        initTheme();
+    }
+
     renderVersion();
-
-    // 渲染工具分类列表
     renderTools();
-
-    // 渲染通知标签
     renderNoticeTags();
-
-    // 渲染通知列表
     renderNotices();
 
-    // 绑定事件
+    if (restored) {
+        searchInput.value = pendingSearchQuery;
+        handleSearch(pendingSearchQuery);
+        renderNoticeTags();
+        renderNotices();
+        requestAnimationFrame(() => {
+            window.scrollTo(0, pendingScrollY);
+        });
+    }
+
     bindEvents();
+}
+
+// ============================================
+// 页面状态持久化（跳转外部站点前保存，后退返回时恢复）
+// ============================================
+
+/**
+ * 保存当前页面状态到 sessionStorage
+ */
+function savePortalState() {
+    const state = {
+        theme: document.documentElement.getAttribute('data-theme') || 'light',
+        searchQuery: searchInput.value.trim(),
+        currentTag: currentTag,
+        scrollY: window.scrollY || window.pageYOffset
+    };
+    sessionStorage.setItem(PORTAL_STATE_KEY, JSON.stringify(state));
+}
+
+/**
+ * 从 sessionStorage 恢复页面状态（仅执行一次）
+ * @returns {boolean} 是否成功恢复
+ */
+function restorePortalState() {
+    const raw = sessionStorage.getItem(PORTAL_STATE_KEY);
+    if (!raw) return false;
+
+    try {
+        const state = JSON.parse(raw);
+        sessionStorage.removeItem(PORTAL_STATE_KEY);
+
+        if (state.theme) {
+            setTheme(state.theme);
+            localStorage.setItem('theme', state.theme);
+        }
+
+        pendingSearchQuery = state.searchQuery || '';
+
+        if (state.currentTag) {
+            currentTag = state.currentTag;
+        }
+
+        pendingScrollY = state.scrollY || 0;
+        return true;
+    } catch {
+        sessionStorage.removeItem(PORTAL_STATE_KEY);
+        return false;
+    }
+}
+
+/**
+ * 跳转到外部工具页面（当前标签页）
+ * @param {string} url - 目标 URL
+ */
+function navigateToExternal(url) {
+    savePortalState();
+    window.location.href = url;
 }
 
 // ============================================
@@ -58,7 +125,6 @@ function init() {
  * 检查用户偏好或系统设置
  */
 function initTheme() {
-    // 优先级：localStorage > 系统偏好
     const savedTheme = localStorage.getItem('theme');
 
     if (savedTheme) {
@@ -69,7 +135,6 @@ function initTheme() {
         setTheme('light');
     }
 
-    // 监听系统主题变化
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
         if (!localStorage.getItem('theme')) {
             setTheme(e.matches ? 'dark' : 'light');
@@ -111,7 +176,6 @@ function renderVersion() {
  * 渲染工具分类列表
  */
 function renderTools() {
-    // 按分类分组工具
     const groupedTools = {};
 
     TOOLS_DATA.forEach(tool => {
@@ -121,12 +185,10 @@ function renderTools() {
         groupedTools[tool.category].push(tool);
     });
 
-    // 按指定顺序排列分类
     const sortedCategories = CATEGORY_ORDER.filter(cat => groupedTools[cat]);
     const extraCategories = Object.keys(groupedTools).filter(cat => !CATEGORY_ORDER.includes(cat));
     const allCategories = [...sortedCategories, ...extraCategories];
 
-    // 生成HTML
     let html = '';
 
     allCategories.forEach(category => {
@@ -147,21 +209,20 @@ function renderTools() {
 }
 
 /**
- * 创建单个工具链接HTML
+ * 创建单个工具链接 HTML
+ * 点击后在当前标签页跳转，可通过浏览器后退返回
  * @param {Object} tool - 工具数据
  * @returns {string} HTML字符串
  */
 function createToolLink(tool) {
     return `
-        <a href="${tool.url}" 
-           class="tool-link" 
-           target="_blank" 
-           rel="noopener noreferrer"
-           data-name="${tool.name}"
-           data-category="${tool.category}">
+        <button class="tool-link"
+           data-url="${tool.url}"
+           data-category="${tool.category}"
+           title="即将跳转至外部网站，返回请使用浏览器后退按钮">
             <span class="tool-icon">${tool.icon || '🔗'}</span>
             <span class="tool-name">${tool.name}</span>
-        </a>
+        </button>
     `;
 }
 
@@ -184,17 +245,14 @@ function renderNoticeTags() {
  * 根据当前筛选标签和搜索关键词过滤
  */
 function renderNotices() {
-    // 过滤通知
     let filteredNotices = NOTICES_DATA;
 
-    // 按标签筛选
     if (currentTag !== '全部') {
         filteredNotices = filteredNotices.filter(notice =>
             notice.tags.includes(currentTag)
         );
     }
 
-    // 按搜索关键词筛选
     if (searchQuery) {
         const query = searchQuery.toLowerCase();
         filteredNotices = filteredNotices.filter(notice =>
@@ -204,7 +262,6 @@ function renderNotices() {
         );
     }
 
-    // 生成HTML
     if (filteredNotices.length === 0) {
         noticesList.innerHTML = `
             <div class="no-results">
@@ -243,26 +300,21 @@ function renderNotices() {
 function handleSearch(query) {
     searchQuery = query.trim().toLowerCase();
 
-    // 过滤工具链接
     const allToolLinks = document.querySelectorAll('.tool-link');
     const allSections = document.querySelectorAll('#toolsContainer .section');
 
     if (searchQuery) {
-        // 显示/隐藏工具链接
         allToolLinks.forEach(link => {
-            const name = link.dataset.name.toLowerCase();
+            const name = link.querySelector('.tool-name').textContent.toLowerCase();
             const category = link.dataset.category.toLowerCase();
-            const match = name.includes(searchQuery) || category.includes(searchQuery);
-            link.style.display = match ? '' : 'none';
+            link.style.display = (name.includes(searchQuery) || category.includes(searchQuery)) ? '' : 'none';
         });
 
-        // 隐藏空分类
         allSections.forEach(section => {
             const visibleLinks = section.querySelectorAll('.tool-link:not([style*="display: none"])');
             section.style.display = visibleLinks.length > 0 ? '' : 'none';
         });
     } else {
-        // 显示所有
         allToolLinks.forEach(link => {
             link.style.display = '';
         });
@@ -271,7 +323,6 @@ function handleSearch(query) {
         });
     }
 
-    // 重新渲染通知
     renderNotices();
 }
 
@@ -280,30 +331,31 @@ function handleSearch(query) {
 // ============================================
 
 function bindEvents() {
-    // 搜索输入
+    toolsContainer.addEventListener('click', (e) => {
+        const toolLink = e.target.closest('.tool-link');
+        if (!toolLink) return;
+        const url = toolLink.dataset.url;
+        if (url) navigateToExternal(url);
+    });
+
     searchInput.addEventListener('input', (e) => {
         handleSearch(e.target.value);
     });
 
-    // 搜索框获得焦点时执行搜索（用于空搜索时的通知筛选）
     searchInput.addEventListener('focus', () => {
         handleSearch(searchInput.value);
     });
 
-    // 深色模式切换
     themeToggle.addEventListener('click', toggleTheme);
 
-    // 通知标签点击（使用事件委托）
     filterTags.addEventListener('click', (e) => {
         if (e.target.classList.contains('filter-tag')) {
             currentTag = e.target.dataset.tag;
 
-            // 更新标签样式
             document.querySelectorAll('.filter-tag').forEach(tag => {
                 tag.classList.toggle('active', tag.dataset.tag === currentTag);
             });
 
-            // 重新渲染通知
             renderNotices();
         }
     });
