@@ -461,20 +461,51 @@ function initStarfield() {
         });
     }
 
-    function animate(time) {
-        drawBackground();
-        drawStars(time);
-        drawShootingStars(time);
+    let animationId = null;
+    let isRunning = true;
 
-        if (Math.random() < 0.008) {
-            const count = Math.random() < 0.2 ? Math.floor(Math.random() * 3) + 2 : 1;
-            for (let i = 0; i < count; i++) {
-                shootingStars.push(spawnShootingStar());
+    function startAnimation() {
+        if (animationId) return;
+        function loop(time) {
+            drawBackground();
+            drawStars(time);
+            drawShootingStars(time);
+
+            if (Math.random() < 0.008) {
+                const count = Math.random() < 0.2 ? Math.floor(Math.random() * 3) + 2 : 1;
+                for (let i = 0; i < count; i++) {
+                    shootingStars.push(spawnShootingStar());
+                }
             }
-        }
 
-        requestAnimationFrame(animate);
+            animationId = requestAnimationFrame(loop);
+        }
+        animationId = requestAnimationFrame(loop);
     }
+
+    function stopAnimation() {
+        if (animationId) {
+            cancelAnimationFrame(animationId);
+            animationId = null;
+        }
+        ctx.clearRect(0, 0, width, height);
+    }
+
+    function syncAnimationState() {
+        const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        if (isDark && !isRunning) {
+            isRunning = true;
+            startAnimation();
+        } else if (!isDark && isRunning) {
+            isRunning = false;
+            stopAnimation();
+        }
+    }
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncAnimationState);
+
+    const observer = new MutationObserver(syncAnimationState);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
     resize();
     stars = createStars(Math.min(500, Math.floor((width * height) / 3000)));
@@ -488,10 +519,12 @@ function initStarfield() {
             star.centerX = cx;
             star.centerY = cy;
         });
-        stars = createStars(Math.min(500, Math.floor((width * height) / 3000)));
+        if (isRunning) {
+            stars = createStars(Math.min(500, Math.floor((width * height) / 3000)));
+        }
     });
 
-    requestAnimationFrame(animate);
+    syncAnimationState();
 }
 
 // ============================================

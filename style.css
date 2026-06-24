@@ -78,6 +78,27 @@ body {
     pointer-events: none;
 }
 
+/* ==================== 醒目免责声明横幅 ==================== */
+.disclaimer-banner {
+    background-color: #fff3cd;
+    color: #856404;
+    text-align: center;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #ffc107;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+}
+
+[data-theme="dark"] .disclaimer-banner {
+    background-color: #3d2e00;
+    color: #ffd966;
+    border-bottom-color: #b38600;
+}
+
 /* ==================== 顶部区域 ==================== */
 .header {
     background-color: var(--bg-color);
@@ -114,8 +135,13 @@ body {
 
 .disclaimer {
     font-size: 12px;
-    color: var(--text-muted);
+    color: #c0392b;
     margin-top: 4px;
+    font-weight: 600;
+}
+
+[data-theme="dark"] .disclaimer {
+    color: #e74c3c;
 }
 
 /* 搜索框和主题切换 */
@@ -421,8 +447,13 @@ body {
 
 .footer-disclaimer {
     font-size: 13px;
-    color: var(--text-secondary);
+    color: #c0392b;
     margin-bottom: 8px;
+    font-weight: 600;
+}
+
+[data-theme="dark"] .footer-disclaimer {
+    color: #e74c3c;
 }
 
 .footer-info {
