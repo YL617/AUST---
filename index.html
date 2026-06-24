@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="安理工学生工具门户 - 整合校园常用链接的导航站点，教务、AI、求职、学术搜索一站直达">
+    <meta name="theme-color" content="#0066cc">
     <title>安理工学生工具门户</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -27,8 +29,19 @@
             <!-- 搜索框和深色模式切换 -->
             <div class="header-controls">
                 <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="搜索工具..." autocomplete="off">
-                    <span class="search-icon">🔍</span>
+                    <span class="search-mode-toggle" id="searchModeToggle" title="切换搜索模式">
+                        <span class="search-mode-icon" id="searchModeIcon">🔧</span>
+                    </span>
+                    <select class="search-platform" id="searchPlatform" hidden>
+                        <option value="baidu">百度</option>
+                        <option value="zhihu">知乎</option>
+                        <option value="xiaohongshu">小红书</option>
+                        <option value="cnblogs">博客园</option>
+                        <option value="github">GitHub</option>
+                        <option value="bilibili">B站</option>
+                    </select>
+                    <input type="text" id="searchInput" placeholder="搜索工具…" autocomplete="off">
+                    <span class="search-icon" id="searchIcon">🔍</span>
                 </div>
                 <button class="theme-toggle" id="themeToggle" aria-label="切换深色模式">
                     <span class="theme-icon">🌙</span>
@@ -40,10 +53,14 @@
     <!-- 跳转提示 -->
     <p class="nav-hint">点击工具链接将跳转到外部网站，返回请使用浏览器后退按钮</p>
 
+    <!-- 分类快捷导航 -->
+    <nav class="category-nav" id="categoryNav" aria-label="工具分类"></nav>
+
     <!-- 主内容区域 -->
     <main class="main-content" id="mainContent">
         <!-- 工具链接区块将通过JS动态生成 -->
         <div id="toolsContainer"></div>
+        <div class="no-results tools-empty" id="toolsEmpty" hidden>未找到匹配的工具</div>
 
         <!-- 通知公告区块 -->
         <section class="section notices-section" id="noticesSection">
@@ -95,6 +112,7 @@
     </footer>
 
     <script src="data.js"></script>
+    <script src="icons/manifest.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

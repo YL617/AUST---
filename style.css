@@ -28,8 +28,8 @@
 
 [data-theme="dark"] {
     /* 深色模式颜色 */
-    --bg-color: #1a1a1a;
-    --bg-secondary: #242424;
+    --bg-color: rgba(26, 26, 26, 0.88);
+    --bg-secondary: rgba(36, 36, 36, 0.85);
     --text-primary: #e8e8e8;
     --text-secondary: #b0b0b0;
     --text-muted: #777777;
@@ -108,7 +108,8 @@ body {
     top: 0;
     z-index: 100;
     transition: background-color 0.3s ease, border-color 0.3s ease;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .header-content {
@@ -185,6 +186,69 @@ body {
     pointer-events: none;
 }
 
+/* 搜索模式切换 */
+.search-mode-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    flex-shrink: 0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.search-mode-toggle:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.search-box.search-platform-mode .search-mode-toggle {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.search-platform {
+    padding: 6px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 13px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    height: 36px;
+    display: none;
+}
+
+.search-platform:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.search-box.search-platform-mode .search-platform {
+    display: block;
+}
+
+.search-box.search-platform-mode input {
+    padding-left: 12px;
+}
+
+.search-box.search-platform-mode .search-icon {
+    display: none;
+}
+
+.search-mode-icon {
+    line-height: 1;
+}
+
 /* 深色模式切换按钮 */
 .theme-toggle {
     width: 36px;
@@ -217,6 +281,54 @@ body {
     text-align: center;
 }
 
+/* ==================== 分类快捷导航 ==================== */
+.category-nav {
+    max-width: 1200px;
+    margin: 12px auto 0;
+    padding: 0 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.category-pill {
+    padding: 5px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.category-pill:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    background-color: var(--accent-light);
+}
+
+.section-count {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-left: 4px;
+}
+
+.tools-empty {
+    padding: 32px 20px;
+}
+
+.tool-link .tool-icon-fallback {
+    display: none;
+    font-size: 20px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
 /* ==================== 主内容区域 ==================== */
 .main-content {
     max-width: 1200px;
@@ -231,6 +343,9 @@ body {
     border-radius: 12px;
     padding: 20px 24px;
     border: 1px solid var(--border-color);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    scroll-margin-top: 88px;
 }
 
 .section-title {
@@ -276,8 +391,10 @@ body {
 }
 
 .tool-link .tool-icon {
-    font-size: 20px;
+    width: 20px;
+    height: 20px;
     flex-shrink: 0;
+    border-radius: 4px;
 }
 
 .tool-link .tool-name {
@@ -487,6 +604,26 @@ body {
         font-size: 11px;
     }
 
+    .category-nav {
+        padding: 0 12px;
+        gap: 6px;
+        justify-content: flex-start;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .category-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    .category-pill {
+        flex-shrink: 0;
+        font-size: 11px;
+        padding: 4px 12px;
+    }
+
     .header {
         padding: 16px 12px;
     }
@@ -517,6 +654,22 @@ body {
         width: 180px;
     }
 
+    .search-box.search-platform-mode input {
+        width: 120px;
+    }
+
+    .search-platform {
+        font-size: 12px;
+        padding: 5px 6px;
+        max-width: 80px;
+    }
+
+    .search-mode-toggle {
+        width: 26px;
+        height: 26px;
+        font-size: 12px;
+    }
+
     .main-content {
         padding: 16px 12px 32px;
     }
@@ -541,7 +694,9 @@ body {
     }
 
     .tool-link .tool-icon {
-        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        border-radius: 3px;
     }
 
     .notices-section {
@@ -573,6 +728,10 @@ body {
 
     .search-box input:focus {
         width: 260px;
+    }
+
+    .search-box.search-platform-mode input {
+        width: 180px;
     }
 }
 

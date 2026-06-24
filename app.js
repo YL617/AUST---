@@ -14,12 +14,38 @@
 // DOM 元素引用
 // ============================================
 const searchInput = document.getElementById('searchInput');
+const searchModeToggle = document.getElementById('searchModeToggle');
+const searchModeIcon = document.getElementById('searchModeIcon');
+const searchPlatform = document.getElementById('searchPlatform');
+const searchIcon = document.getElementById('searchIcon');
+const searchBox = searchInput.closest('.search-box');
 const themeToggle = document.getElementById('themeToggle');
 const themeIcon = document.querySelector('.theme-icon');
 const toolsContainer = document.getElementById('toolsContainer');
+const categoryNav = document.getElementById('categoryNav');
+const toolsEmpty = document.getElementById('toolsEmpty');
 const filterTags = document.getElementById('filterTags');
 const noticesList = document.getElementById('noticesList');
 const versionText = document.getElementById('versionText');
+
+// ============================================
+// 搜索模式配置
+// ============================================
+const SEARCH_MODES = {
+    tool: { icon: '🔧', placeholder: '搜索工具…' },
+    web: { icon: '🌐', placeholder: '输入关键词搜索…' }
+};
+
+const SEARCH_ENGINES = {
+    baidu:      { name: '百度',   url: 'https://www.baidu.com/s?wd=' },
+    zhihu:      { name: '知乎',   url: 'https://www.zhihu.com/search?type=content&q=' },
+    xiaohongshu:{ name: '小红书', url: 'https://www.xiaohongshu.com/search_result?keyword=' },
+    cnblogs:    { name: '博客园', url: 'https://s.cnblogs.com/search?q=' },
+    github:     { name: 'GitHub', url: 'https://github.com/search?q=' },
+    bilibili:   { name: 'B站',    url: 'https://search.bilibili.com/all?keyword=' }
+};
+
+let searchMode = 'tool'; // 'tool' | 'web'
 
 // ============================================
 // 状态管理
@@ -44,6 +70,7 @@ function init() {
 
     renderVersion();
     renderTools();
+    renderCategoryNav();
     renderNoticeTags();
     renderNotices();
 
@@ -58,6 +85,7 @@ function init() {
     }
 
     bindEvents();
+    updateSearchUI();
 }
 
 // ============================================
@@ -197,8 +225,8 @@ function renderTools() {
         if (!tools || tools.length === 0) return;
 
         html += `
-            <section class="section" data-category="${category}">
-                <h2 class="section-title">${category}</h2>
+            <section class="section" data-category="${category}" id="cat-${encodeCategoryId(category)}">
+                <h2 class="section-title">${category} <span class="section-count">${tools.length}</span></h2>
                 <div class="tools-grid">
                     ${tools.map(tool => createToolLink(tool)).join('')}
                 </div>
@@ -209,6 +237,70 @@ function renderTools() {
     toolsContainer.innerHTML = html;
 }
 
+function encodeCategoryId(category) {
+    return category.replace(/[^a-zA-Z0-9\u4e00-\u9fff]/g, '-');
+}
+
+/**
+ * 获取工具图标 URL（优先本地，其次 Google CDN）
+ */
+function getToolIconUrl(domain) {
+    if (typeof ICON_MANIFEST !== 'undefined' && ICON_MANIFEST[domain]) {
+        return `icons/${ICON_MANIFEST[domain]}`;
+    }
+    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=32`;
+}
+
+/**
+ * 图标加载失败时的降级处理
+ */
+function handleIconError(img, domain) {
+    if (img.dataset.fallback !== 'cdn') {
+        img.dataset.fallback = 'cdn';
+        img.src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=32`;
+        return;
+    }
+    img.style.display = 'none';
+    const fallback = img.nextElementSibling;
+    if (fallback) fallback.style.display = 'inline';
+}
+
+/**
+ * 渲染分类快捷导航
+ */
+function renderCategoryNav() {
+    if (!categoryNav) return;
+
+    const sections = toolsContainer.querySelectorAll('.section[data-category]');
+    categoryNav.innerHTML = [...sections].map(section => `
+        <button class="category-pill" data-category="${section.dataset.category}">
+            ${section.dataset.category}
+        </button>
+    `).join('');
+}
+
+/**
+ * 更新分类导航与空状态可见性
+ */
+function updateSearchUI() {
+    if (!categoryNav) return;
+
+    const pills = categoryNav.querySelectorAll('.category-pill');
+    pills.forEach(pill => {
+        const category = pill.dataset.category;
+        const section = toolsContainer.querySelector(`.section[data-category="${category}"]`);
+        const visible = section && section.style.display !== 'none';
+        pill.style.display = visible ? '' : 'none';
+    });
+
+    if (toolsEmpty) {
+        const anyVisible = [...toolsContainer.querySelectorAll('.section')].some(
+            s => s.style.display !== 'none'
+        );
+        toolsEmpty.hidden = !(searchQuery && !anyVisible);
+    }
+}
+
 /**
  * 创建单个工具链接 HTML
  * 点击后在当前标签页跳转，可通过浏览器后退返回
@@ -216,12 +308,17 @@ function renderTools() {
  * @returns {string} HTML字符串
  */
 function createToolLink(tool) {
+    const domain = new URL(tool.url).hostname;
+    const iconUrl = getToolIconUrl(domain);
     return `
         <button class="tool-link"
            data-url="${tool.url}"
            data-category="${tool.category}"
            title="即将跳转至外部网站，返回请使用浏览器后退按钮">
-            <span class="tool-icon">${tool.icon || '🔗'}</span>
+            <img class="tool-icon" src="${iconUrl}" alt="" loading="lazy"
+                 data-domain="${domain}"
+                 onerror="handleIconError(this, this.dataset.domain)">
+            <span class="tool-icon-fallback">${tool.icon || '🔗'}</span>
             <span class="tool-name">${tool.name}</span>
         </button>
     `;
@@ -299,6 +396,8 @@ function renderNotices() {
  * @param {string} query - 搜索关键词
  */
 function handleSearch(query) {
+    if (searchMode === 'web') return;
+
     searchQuery = query.trim().toLowerCase();
 
     const allToolLinks = document.querySelectorAll('.tool-link');
@@ -325,6 +424,41 @@ function handleSearch(query) {
     }
 
     renderNotices();
+    updateSearchUI();
+}
+
+/**
+ * 切换搜索模式（工具搜索 / 平台搜索）
+ */
+function switchSearchMode(mode) {
+    if (mode === searchMode) return;
+    searchMode = mode;
+    const config = SEARCH_MODES[mode];
+
+    searchModeIcon.textContent = config.icon;
+    searchInput.placeholder = config.placeholder;
+
+    if (mode === 'web') {
+        searchBox.classList.add('search-platform-mode');
+        searchPlatform.hidden = false;
+        searchInput.value = '';
+        handleSearch('');
+    } else {
+        searchBox.classList.remove('search-platform-mode');
+        searchPlatform.hidden = true;
+        searchInput.value = '';
+        handleSearch('');
+    }
+}
+
+/**
+ * 执行平台搜索，打开新标签页跳转
+ */
+function doWebSearch(query) {
+    const engine = SEARCH_ENGINES[searchPlatform.value];
+    if (!engine || !query.trim()) return;
+    const url = engine.url + encodeURIComponent(query.trim());
+    window.open(url, '_blank');
 }
 
 // ============================================
@@ -539,12 +673,65 @@ function bindEvents() {
         if (url) navigateToExternal(url);
     });
 
+    if (categoryNav) {
+        categoryNav.addEventListener('click', (e) => {
+            const pill = e.target.closest('.category-pill');
+            if (!pill) return;
+            const section = toolsContainer.querySelector(
+                `.section[data-category="${pill.dataset.category}"]`
+            );
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    }
+
     searchInput.addEventListener('input', (e) => {
         handleSearch(e.target.value);
     });
 
     searchInput.addEventListener('focus', () => {
-        handleSearch(searchInput.value);
+        if (searchMode === 'tool') {
+            handleSearch(searchInput.value);
+        }
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            searchInput.value = '';
+            handleSearch('');
+            searchInput.blur();
+        }
+
+        if (searchMode === 'web' && e.key === 'Enter') {
+            doWebSearch(searchInput.value);
+        }
+    });
+
+    searchModeToggle.addEventListener('click', () => {
+        switchSearchMode(searchMode === 'tool' ? 'web' : 'tool');
+    });
+
+    searchPlatform.addEventListener('change', () => {
+        // Platform changed; if there's text in input, auto-search
+        if (searchInput.value.trim()) {
+            doWebSearch(searchInput.value);
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        const tag = document.activeElement?.tagName;
+        const isTyping = tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement?.isContentEditable;
+        if (isTyping) return;
+
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            searchInput.focus();
+            searchInput.select();
+        } else if (e.key === '/') {
+            e.preventDefault();
+            searchInput.focus();
+        }
     });
 
     themeToggle.addEventListener('click', toggleTheme);

@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <link href="" rel="icon" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>爱学术_AI文献阅读器</title>
+  <meta name="keywords" content="爱学术，ai论文，ai阅读，文献管理，ai文献翻译，ai写作，文献综述">
+  <meta name="description"
+        content="爱学术是一款依托自主研发的AI学术大模型打造的智能文献管理平台，专为科研人员和学者量身定制，提供高效、便捷的全方位学术支持。该平台集成学术对话、文献管理、AI文献阅读、AI写作、AI文献翻译（保留格式）等多项功能于一体，助力用户提升学术产出效率。爱学术不仅简化了繁琐的科研流程，还为研究人员提供了智能化工具，优化了科研体验，帮助他们专注于创新与探索，从而更快、更高效地推动科研进展。">
+  <script type="module" crossorigin src="https://static-cdn.ixueshu.com/index-0339354f-398575.js"></script>
+  <link rel="modulepreload" crossorigin href="https://static-cdn.ixueshu.com/chunk-vendor-894eba3f-398575.js">
+  <link rel="stylesheet" href="https://static-cdn.ixueshu.com/assets/index-2760f024-398575.css">
+</head>
+<body>
+<div id="app"></div>
+<script src="https://static-cdn.ixueshu.com/TCaptcha.js"></script>
+<!--    <script src="/plugins/mathjax/MathJax.js"></script>-->
+
+
+
+
+          <link rel="stylesheet" href="https://static-cdn.keyanjia.com/static/iconfont/iconfont.css?v=1739857549779" defer>
+          <script src="https://static-cdn.keyanjia.com/static/iconfont/iconfont.js?v=1739857549779" defer></script>
+        </body>
+</html>

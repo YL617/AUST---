@@ -16,8 +16,8 @@ const SITE_CONFIG = {
     siteName: '安理工学生工具门户',
     slogan: '校园生活小助手',
     disclaimer: '非官方·学生自制公益工具站',
-    version: 'v2.0.0',
-    lastUpdate: '2024-09-15'
+    version: 'v2.1.0',
+    lastUpdate: '2025-06-22'
 };
 
 // ============================================
@@ -145,7 +145,6 @@ const TOOLS_DATA = [
     },
 
     // ===== 学术搜索 · 查重 =====
-    { name: '安理图书馆', url: 'http://lib.aust.edu.cn', category: '学术搜索·查重', icon: '📚' },
     { name: '朱雀AI检测', url: 'https://matrix.tencent.com/ai-detect/ai_gen', category: '学术搜索·查重', icon: '🔍' },
     { name: '中国知网', url: 'https://www.cnki.net', category: '学术搜索·查重', icon: '📖' },
     { name: '谷歌学术', url: 'https://scholar.google.com', category: '学术搜索·查重', icon: '🌐' },
@@ -154,7 +153,6 @@ const TOOLS_DATA = [
     { name: '维普网', url: 'https://www.cqvip.com', category: '学术搜索·查重', icon: '📄' },
     { name: '爱学术', url: 'https://www.ixueshu.com', category: '学术搜索·查重', icon: '📝' },
     { name: '万方数据', url: 'https://www.wanfangdata.com.cn', category: '学术搜索·查重', icon: '📊' },
-    { name: 'Github', url: 'https://github.com', category: '学术搜索·查重', icon: '💻' },
     { name: 'WOS', url: 'https://www.webofscience.com', category: '学术搜索·查重', icon: '🌍' },
     { name: 'Sci-Hub', url: 'https://sci-hub.se', category: '学术搜索·查重', icon: '🔓' },
 
@@ -296,18 +294,6 @@ const TOOLS_DATA = [
         url: 'https://muchong.com',
         category: '考研考公',
         icon: '🐛'
-    },
-    {
-        name: '小木虫',
-        url: 'https://muchong.com',
-        category: '考研考公',
-        icon: '🐛'
-    },
-    {
-        name: '研招网（考研报名）',
-        url: 'https://yz.chsi.com.cn',
-        category: '考研考公',
-        icon: '📝'
     },
 ];
 
