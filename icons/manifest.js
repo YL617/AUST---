@@ -4,7 +4,7 @@
  */
 const ICON_MANIFEST = {
     "cet.neea.edu.cn": "cet.neea.edu.cn.ico",
-    "chat.deepseek.com": "chat.deepseek.com.ico",
+    "chat.deepseek.com": "chat.deepseek.com.png",
     "chatglm.cn": "chatglm.cn.ico",
     "cli.im": "cli.im.ico",
     "fanyi.baidu.com": "fanyi.baidu.com.ico",
@@ -28,10 +28,10 @@ const ICON_MANIFEST = {
     "www.bing.com": "www.bing.com.ico",
     "www.cctv.com": "www.cctv.com.ico",
     "www.cnki.net": "www.cnki.net.ico",
-    "www.coze.cn": "www.coze.cn.ico",
+    "www.coze.cn": "www.coze.cn.png",
     "www.cqvip.com": "www.cqvip.com.ico",
     "www.csdn.net": "www.csdn.net.ico",
-    "www.doubao.com": "www.doubao.com.ico",
+    "www.doubao.com": "www.doubao.com.png",
     "www.duoduo.link": "www.duoduo.link.ico",
     "www.icourse163.org": "www.icourse163.org.png",
     "www.ilovepdf.com": "www.ilovepdf.com.ico",

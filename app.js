@@ -242,13 +242,13 @@ function encodeCategoryId(category) {
 }
 
 /**
- * 获取工具图标 URL（优先本地，其次 Google CDN）
+ * 获取工具图标 URL（优先本地，其次国内 CDN）
  */
 function getToolIconUrl(domain) {
     if (typeof ICON_MANIFEST !== 'undefined' && ICON_MANIFEST[domain]) {
         return `icons/${ICON_MANIFEST[domain]}`;
     }
-    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=32`;
+    return `https://api.iowen.cn/favicon/${domain}.png`;
 }
 
 /**
@@ -257,7 +257,7 @@ function getToolIconUrl(domain) {
 function handleIconError(img, domain) {
     if (img.dataset.fallback !== 'cdn') {
         img.dataset.fallback = 'cdn';
-        img.src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=32`;
+        img.src = `https://api.iowen.cn/favicon/${domain}.png`;
         return;
     }
     img.style.display = 'none';
